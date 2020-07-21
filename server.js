@@ -3,6 +3,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const connectDB = require('./config/db');
+const compression = require('compression');
 
 dotenv.config({ path: './config/config.env' });
 
@@ -15,6 +16,7 @@ const app = express();
 //Body-parser
 app.use(express.json());
 
+app.use(compression());
 //Enable cors
 app.use(cors());
 
