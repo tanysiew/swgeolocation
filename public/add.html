@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.4/xlsx.full.min.js" integrity="sha512-1iIuDIuCNdHk07niu3zD0/ROhY5+siV31lrvspdScXdRPyM4yDCvHQ1KOSdir3IoazsqSgF7gZOJMPD+O/ECGA==" crossorigin="anonymous"></script>
+    <title>Store Locator - Add Store</title>
+</head>
+
+<body>
+    <h1>Add Data</h1>
+    <input type="file" id="fileUpload" accept=".xls,xlsx" /><br>
+    <button type="button" id="uploadExcel">Convert</button>
+    <pre id="jsonData"></pre>
+</body>
+
+<script>
+    let selectedFile;
+    console.log(window.XLSX);
+
+    document.getElementById('fileUpload').addEventListener('change', event => {
+        selectedFile = event.target.files[0];
+    });
+
+    document.getElementById('uploadExcel').addEventListener('click', () => {
+        if (selectedFile) {
+            let fileReader = new FileReader();
+            fileReader.readAsBinaryString(selectedFile);
+            fileReader.onload = (event) => {
+
+                let data = event.target.result;
+                let workbook = XLSX.read(data, {
+                    type: "binary"
+                });
+                console.log(workbook);
+                workbook.SheetNames.forEach(sheet => {
+                    let rowObject = XLSX.utils.sheet_to_json(workbook.Sheets[sheet]);
+                    rowObject.forEach(async function(value, i) {
+
+                        const sendbody = {
+                            storeId: "000" + i + 1,
+                            address: value.Address
+                        };
+
+                        try {
+                            const res = await fetch('/api/v1/stores', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify(sendbody)
+                            });
+
+                        } catch (error) {
+                            console.log(error);
+                        }
+
+
+                    })
+                    console.log("DONE");
+
+                })
+            }
+        }
+    });
+</script>
+
+</html>
